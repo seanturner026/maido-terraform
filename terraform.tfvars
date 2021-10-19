@@ -1,0 +1,2 @@
+name        = "maido"
+environment = "dev"

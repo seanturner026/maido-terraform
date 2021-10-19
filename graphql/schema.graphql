@@ -1,0 +1,123 @@
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+type MaidoTable {
+  DK1: String
+  PK: String!
+  SK: String!
+}
+
+type MaidoTableConnection {
+  items: [MaidoTable]
+  nextToken: String
+}
+
+type Mutation {
+  createMaidoTable(input: CreateMaidoTableInput!): MaidoTable
+  deleteMaidoTable(input: DeleteMaidoTableInput!): MaidoTable
+  updateMaidoTable(input: UpdateMaidoTableInput!): MaidoTable
+}
+
+type Query {
+  getMaidoTable(PK: String!, SK: String!): MaidoTable
+  listMaidoTables(
+    filter: TableMaidoTableFilterInput
+    limit: Int
+    nextToken: String
+  ): MaidoTableConnection
+  queryMaidoTablesByGSI1(
+    SK: String!
+    after: String
+    first: Int
+  ): MaidoTableConnection
+}
+
+type Subscription {
+  onCreateMaidoTable(DK1: String, PK: String, SK: String): MaidoTable
+    @aws_subscribe(mutations: ["createMaidoTable"])
+  onDeleteMaidoTable(DK1: String, PK: String, SK: String): MaidoTable
+    @aws_subscribe(mutations: ["deleteMaidoTable"])
+  onUpdateMaidoTable(DK1: String, PK: String, SK: String): MaidoTable
+    @aws_subscribe(mutations: ["updateMaidoTable"])
+}
+
+input CreateMaidoTableInput {
+  DK1: String
+  PK: String!
+  SK: String!
+}
+
+input DeleteMaidoTableInput {
+  PK: String!
+  SK: String!
+}
+
+input TableBooleanFilterInput {
+  eq: Boolean
+  ne: Boolean
+}
+
+input TableFloatFilterInput {
+  between: [Float]
+  contains: Float
+  eq: Float
+  ge: Float
+  gt: Float
+  le: Float
+  lt: Float
+  ne: Float
+  notContains: Float
+}
+
+input TableIDFilterInput {
+  beginsWith: ID
+  between: [ID]
+  contains: ID
+  eq: ID
+  ge: ID
+  gt: ID
+  le: ID
+  lt: ID
+  ne: ID
+  notContains: ID
+}
+
+input TableIntFilterInput {
+  between: [Int]
+  contains: Int
+  eq: Int
+  ge: Int
+  gt: Int
+  le: Int
+  lt: Int
+  ne: Int
+  notContains: Int
+}
+
+input TableMaidoTableFilterInput {
+  DK1: TableStringFilterInput
+  PK: TableStringFilterInput
+  SK: TableStringFilterInput
+}
+
+input TableStringFilterInput {
+  beginsWith: String
+  between: [String]
+  contains: String
+  eq: String
+  ge: String
+  gt: String
+  le: String
+  lt: String
+  ne: String
+  notContains: String
+}
+
+input UpdateMaidoTableInput {
+  DK1: String
+  PK: String!
+  SK: String!
+}
