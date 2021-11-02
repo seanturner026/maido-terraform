@@ -1,7 +1,12 @@
-schema {
-  query: Query
-  mutation: Mutation
-  subscription: Subscription
+input CreateMaidoTableInput {
+  DK1: String
+  PK: String!
+  SK: String!
+}
+
+input DeleteMaidoTableInput {
+  PK: String!
+  SK: String!
 }
 
 type MaidoTable {
@@ -17,8 +22,8 @@ type MaidoTableConnection {
 
 type Mutation {
   createMaidoTable(input: CreateMaidoTableInput!): MaidoTable
-  deleteMaidoTable(input: DeleteMaidoTableInput!): MaidoTable
   updateMaidoTable(input: UpdateMaidoTableInput!): MaidoTable
+  deleteMaidoTable(input: DeleteMaidoTableInput!): MaidoTable
 }
 
 type Query {
@@ -30,71 +35,60 @@ type Query {
   ): MaidoTableConnection
   queryMaidoTablesByGSI1(
     SK: String!
-    after: String
     first: Int
+    after: String
   ): MaidoTableConnection
 }
 
 type Subscription {
   onCreateMaidoTable(DK1: String, PK: String, SK: String): MaidoTable
     @aws_subscribe(mutations: ["createMaidoTable"])
-  onDeleteMaidoTable(DK1: String, PK: String, SK: String): MaidoTable
-    @aws_subscribe(mutations: ["deleteMaidoTable"])
   onUpdateMaidoTable(DK1: String, PK: String, SK: String): MaidoTable
     @aws_subscribe(mutations: ["updateMaidoTable"])
-}
-
-input CreateMaidoTableInput {
-  DK1: String
-  PK: String!
-  SK: String!
-}
-
-input DeleteMaidoTableInput {
-  PK: String!
-  SK: String!
+  onDeleteMaidoTable(DK1: String, PK: String, SK: String): MaidoTable
+    @aws_subscribe(mutations: ["deleteMaidoTable"])
 }
 
 input TableBooleanFilterInput {
-  eq: Boolean
   ne: Boolean
+  eq: Boolean
 }
 
 input TableFloatFilterInput {
-  between: [Float]
-  contains: Float
+  ne: Float
   eq: Float
-  ge: Float
-  gt: Float
   le: Float
   lt: Float
-  ne: Float
+  ge: Float
+  gt: Float
+  contains: Float
   notContains: Float
+  between: [Float]
 }
 
 input TableIDFilterInput {
-  beginsWith: ID
-  between: [ID]
-  contains: ID
+  ne: ID
   eq: ID
-  ge: ID
-  gt: ID
   le: ID
   lt: ID
-  ne: ID
+  ge: ID
+  gt: ID
+  contains: ID
   notContains: ID
+  between: [ID]
+  beginsWith: ID
 }
 
 input TableIntFilterInput {
-  between: [Int]
-  contains: Int
+  ne: Int
   eq: Int
-  ge: Int
-  gt: Int
   le: Int
   lt: Int
-  ne: Int
+  ge: Int
+  gt: Int
+  contains: Int
   notContains: Int
+  between: [Int]
 }
 
 input TableMaidoTableFilterInput {
@@ -104,16 +98,16 @@ input TableMaidoTableFilterInput {
 }
 
 input TableStringFilterInput {
-  beginsWith: String
-  between: [String]
-  contains: String
+  ne: String
   eq: String
-  ge: String
-  gt: String
   le: String
   lt: String
-  ne: String
+  ge: String
+  gt: String
+  contains: String
   notContains: String
+  between: [String]
+  beginsWith: String
 }
 
 input UpdateMaidoTableInput {

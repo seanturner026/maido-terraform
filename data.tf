@@ -26,12 +26,6 @@ data "aws_iam_policy_document" "appsync_datasource" {
     actions   = ["dynamodb:*"]
     resources = [aws_dynamodb_table.this.arn, "${aws_dynamodb_table.this.arn}/index/${local.gsi_name}"]
   }
-
-  statement {
-    effect    = "Allow"
-    actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.this.arn}/*"]
-  }
 }
 
 data "aws_iam_policy_document" "bucket" {

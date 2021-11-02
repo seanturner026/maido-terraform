@@ -44,14 +44,3 @@ resource "aws_appsync_datasource" "dynamodb" {
     table_name = aws_dynamodb_table.this.name
   }
 }
-
-resource "aws_appsync_datasource" "s3" {
-  name             = "${local.name}_s3_datasource"
-  api_id           = aws_appsync_graphql_api.this.id
-  service_role_arn = aws_iam_role.this.arn
-  type             = "HTTP"
-
-  http_config {
-    endpoint = "https://${module.cloudfront.cloudfront_distribution_domain_name}"
-  }
-}
