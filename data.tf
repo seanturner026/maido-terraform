@@ -1,3 +1,12 @@
+data "aws_region" "current" {}
+
+data "aws_route53_zone" "this" {
+  count = var.hosted_zone_name != "" ? 1 : 0
+
+  name         = var.hosted_zone_name
+  private_zone = false
+}
+
 data "aws_iam_policy_document" "appsync_trust" {
   statement {
     effect  = "Allow"
@@ -11,15 +20,20 @@ data "aws_iam_policy_document" "appsync_trust" {
 }
 
 // TODO: implement least permissive policy
-data "aws_iam_policy_document" "appsync_dynamodb_datasource" {
+data "aws_iam_policy_document" "appsync_datasource" {
   statement {
     effect    = "Allow"
     actions   = ["dynamodb:*"]
     resources = [aws_dynamodb_table.this.arn, "${aws_dynamodb_table.this.arn}/index/${local.gsi_name}"]
   }
+
+  statement {
+    effect    = "Allow"
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.this.arn}/*"]
+  }
 }
 
-// TODO: security improvements
 data "aws_iam_policy_document" "bucket" {
   statement {
     sid       = "EnforceHTTPS"
@@ -36,6 +50,19 @@ data "aws_iam_policy_document" "bucket" {
       test     = "Bool"
       values   = ["false"]
       variable = "aws:SecureTransport"
+    }
+  }
+
+  statement {
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.this.arn}/*"]
+
+    principals {
+      type = "AWS"
+      identifiers = concat(
+        [aws_iam_role.this.arn],
+        module.cloudfront.cloudfront_origin_access_identity_iam_arns
+      )
     }
   }
 }

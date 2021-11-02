@@ -1,13 +1,20 @@
 resource "aws_s3_bucket" "this" {
-  bucket = "${var.name}-${var.environment}"
-  acl    = "private"
+  bucket        = "${var.name}-${var.environment}"
+  acl           = "public-read"
+  force_destroy = true
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "POST"]
+    allowed_origins = [var.fqdn_alias]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+
+  website {
+    index_document = "index.html"
+    error_document = "index.html"
   }
 }
 
