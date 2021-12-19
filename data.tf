@@ -19,12 +19,30 @@ data "aws_iam_policy_document" "appsync_trust" {
   }
 }
 
-// TODO: implement least permissive policy
 data "aws_iam_policy_document" "appsync_datasource" {
+  statement {
+    effect    = "Allow"
+    actions   = ["cognito-idp:AdminCreateUser"]
+    resources = [aws_cognito_user_pool.this.arn]
+  }
+
+  // TODO: implement least permissive policy
   statement {
     effect    = "Allow"
     actions   = ["dynamodb:*"]
     resources = [aws_dynamodb_table.this.arn, "${aws_dynamodb_table.this.arn}/index/${local.gsi_name}"]
+  }
+}
+
+data "aws_iam_policy_document" "appsync_cloudwatch" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+    resources = ["*"]
   }
 }
 
@@ -57,7 +75,19 @@ data "aws_iam_policy_document" "cognito_unauth" {
     effect    = "Allow"
     actions   = ["dynamodb:query"]
     resources = [aws_dynamodb_table.this.arn, "${aws_dynamodb_table.this.arn}/index/${local.gsi_name}"]
+
+    # condition {
+    #   test     = "ForAllValues:StringEquals"
+    #   variable = "dynamodb:LeadingKeys"
+    #   values   = ["PRODUCT#*"]
+    # }
   }
+
+  # statement {
+  #   effect    = "Allow"
+  #   actions   = ["s3:GetObject"]
+  #   resources = ["${aws_s3_bucket.this.arn}/products/assets/*"]
+  # }
 }
 
 data "aws_iam_policy_document" "bucket" {

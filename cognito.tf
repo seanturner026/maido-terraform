@@ -50,6 +50,25 @@ resource "aws_cognito_user_pool_client" "this" {
   ]
 }
 
+resource "aws_cognito_user_pool_client" "dev" {
+  count = var.environment == "dev" ? 1 : 0
+
+  name                                 = "appsync-test-${local.name}"
+  user_pool_id                         = aws_cognito_user_pool.this.id
+  generate_secret                      = false
+  allowed_oauth_flows                  = ["code", "implicit"]
+  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_scopes                 = ["email", "openid"]
+  supported_identity_providers         = ["COGNITO"]
+  callback_urls                        = [var.hosted_zone_name != "" && var.fqdn_alias != "" ? "https://${var.fqdn_alias}" : "https://${module.cloudfront.cloudfront_distribution_domain_name}"]
+
+  explicit_auth_flows = [
+    "ALLOW_REFRESH_TOKEN_AUTH",
+    "ALLOW_USER_PASSWORD_AUTH",
+    "ALLOW_USER_SRP_AUTH",
+  ]
+}
+
 resource "aws_cognito_identity_pool" "this" {
   identity_pool_name               = local.name
   allow_unauthenticated_identities = true
@@ -66,4 +85,11 @@ resource "aws_cognito_identity_pool_roles_attachment" "this" {
   roles = {
     "unauthenticated" = aws_iam_role.cognito_unauth.arn
   }
+}
+
+resource "aws_cognito_user_group" "this" {
+  name         = "customers"
+  user_pool_id = aws_cognito_user_pool.this.id
+  description  = "Customer group for ${local.name}"
+  # role_arn     = aws_iam_role.group_role.arn
 }

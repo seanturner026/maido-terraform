@@ -3,10 +3,16 @@ resource "aws_iam_role" "appsync" {
   assume_role_policy = data.aws_iam_policy_document.appsync_trust.json
 }
 
-resource "aws_iam_role_policy" "appsync" {
+resource "aws_iam_role_policy" "appsync_datasource" {
   name   = "${local.name}_appsync_datasource"
   role   = aws_iam_role.appsync.id
   policy = data.aws_iam_policy_document.appsync_datasource.json
+}
+
+resource "aws_iam_role_policy" "appsync_cloudwatch" {
+  name   = "${local.name}_appsync_cloudwatch"
+  role   = aws_iam_role.appsync.id
+  policy = data.aws_iam_policy_document.appsync_cloudwatch.json
 }
 
 resource "aws_iam_role" "cognito_unauth" {

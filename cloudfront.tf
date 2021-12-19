@@ -36,6 +36,19 @@ module "cloudfront" {
     query_string    = true
   }
 
+  ordered_cache_behavior = [
+    {
+      path_pattern           = "/products/assets/*"
+      target_origin_id       = "s3"
+      viewer_protocol_policy = "redirect-to-https"
+
+      allowed_methods = ["GET", "HEAD", "OPTIONS"]
+      cached_methods  = ["GET", "HEAD"]
+      compress        = true
+      query_string    = true
+    }
+  ]
+
   viewer_certificate = {
     cloudfront_default_certificate = var.hosted_zone_name != "" && var.fqdn_alias != "" ? false : true
     minimum_protocol_versione      = var.hosted_zone_name != "" && var.fqdn_alias != "" ? "TLSv1.2" : "TLSv1"

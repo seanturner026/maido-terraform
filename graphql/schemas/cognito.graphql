@@ -1,0 +1,13 @@
+extend type Mutation {
+  createCognitoUser(
+    input: createUserInput!
+  ): createUserOutput! @aws_auth(cognito_groups: ["customers"])
+}
+
+input createCognitoUserInput {
+  email: String!
+}
+
+type createCognitoUserOutput {
+  cognitoUserID: ID!
+}

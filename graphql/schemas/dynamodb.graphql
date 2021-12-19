@@ -9,13 +9,13 @@ input DeleteMaidoTableInput {
   SK: String!
 }
 
-type MaidoTable {
+type MaidoTable @aws_auth(cognito_groups: ["customers"]) {
   DK1: String
   PK: String!
   SK: String!
 }
 
-type MaidoTableConnection {
+type MaidoTableConnection @aws_auth(cognito_groups: ["customers"]) {
   items: [MaidoTable]
   nextToken: String
 }
@@ -28,16 +28,17 @@ type Mutation {
 
 type Query {
   getMaidoTable(PK: String!, SK: String!): MaidoTable
+    @aws_auth(cognito_groups: ["customers"])
   listMaidoTables(
     filter: TableMaidoTableFilterInput
     limit: Int
     nextToken: String
-  ): MaidoTableConnection
+  ): MaidoTableConnection @aws_auth(cognito_groups: ["customers"])
   queryMaidoTablesByGSI1(
     SK: String!
     first: Int
     after: String
-  ): MaidoTableConnection
+  ): MaidoTableConnection @aws_auth(cognito_groups: ["customers"])
 }
 
 type Subscription {
