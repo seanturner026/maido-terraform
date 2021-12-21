@@ -2,7 +2,7 @@
 #set($attribute={})
 
 #set($body.UserPoolId = "${user_pool_id}")
-#set($body.Username = "$ctx.args.email")
+#set($body.Username = $ctx.args.input.email)
 #set($body.ForceAliasCreation = "true")
 
 #set($desired_delivery_mediums = [])
@@ -10,7 +10,7 @@ $util.qr($desired_delivery_mediums.add("EMAIL"))
 #set($body.DesiredDeliveryMediums = $desired_delivery_mediums)
 
 $util.qr($attribute.put("Name", "email"))
-$util.qr($attribute.put("Value", "$ctx.args.email"))
+$util.qr($attribute.put("Value", $ctx.args.input.email))
 #set($UserAttributes = [])
 $util.qr($UserAttributes.add($attribute))
 $util.qr($body.put("UserAttributes", $UserAttributes))

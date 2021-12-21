@@ -1,0 +1,9 @@
+#if($ctx.error)
+  $util.error($ctx.error.message, $ctx.error.type)
+#end
+#if($ctx.result.statusCode == 200)
+  #set( $result = $util.parseJson($ctx.result.body) )
+  $util.toJson({"cognitoUserID":$result.User.Username})
+#else
+  $utils.toJson("0")
+#end

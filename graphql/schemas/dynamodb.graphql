@@ -24,6 +24,8 @@ type Mutation {
   createMaidoTable(input: CreateMaidoTableInput!): MaidoTable
   updateMaidoTable(input: UpdateMaidoTableInput!): MaidoTable
   deleteMaidoTable(input: DeleteMaidoTableInput!): MaidoTable
+  createCognitoUser(input: createCognitoUserInput!): createCognitoUserOutput!
+    @aws_auth(cognito_groups: ["customers"])
 }
 
 type Query {
@@ -115,4 +117,12 @@ input UpdateMaidoTableInput {
   DK1: String
   PK: String!
   SK: String!
+}
+
+input createCognitoUserInput {
+  email: String!
+}
+
+type createCognitoUserOutput {
+  cognitoUserID: ID!
 }

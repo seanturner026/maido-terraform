@@ -13,11 +13,11 @@ resource "aws_appsync_graphql_api" "this" {
     user_pool_id   = aws_cognito_user_pool.this.id
   }
 
-  log_config {
-    cloudwatch_logs_role_arn = aws_iam_role.appsync.arn
-    field_log_level          = "ALL"
-    exclude_verbose_content  = false
-  }
+  # log_config {
+  #   cloudwatch_logs_role_arn = aws_iam_role.appsync.arn
+  #   field_log_level          = "ALL"
+  #   exclude_verbose_content  = false
+  # }
 }
 
 resource "aws_appsync_datasource" "dynamodb" {
@@ -56,6 +56,10 @@ resource "aws_cloudformation_stack" "appsync_cognito_data_source" {
       name:
         Value: "${local.name}_http_cognito"
   STACK
+
+  lifecycle {
+    ignore_changes = [template_body]
+  }
 }
 
 # resource "aws_appsync_datasource" "http" {
@@ -72,3 +76,24 @@ resource "aws_cloudformation_stack" "appsync_cognito_data_source" {
 #     endpoint = each.value
 #   }
 # }
+
+
+resource "aws_appsync_resolver" "this" {
+  for_each = local.resolvers_map
+
+  api_id      = aws_appsync_graphql_api.this.id
+  field       = each.value.field
+  type        = each.value.type
+  data_source = each.value.data_source
+
+  request_template  = templatefile("${path.root}/graphql/request_templates/${each.value.field}.vtl", lookup(each.value, "extra_data", {}))
+  response_template = templatefile("${path.root}/graphql/response_templates/${each.value.field}.vtl", lookup(each.value, "extra_data", {}))
+
+  # caching_config {
+  #   caching_keys = [
+  #     "$context.identity.sub",
+  #     "$context.arguments.id",
+  #   ]
+  #   ttl = 60
+  # }
+}
