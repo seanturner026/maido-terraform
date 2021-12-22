@@ -11,3 +11,4 @@
 crash.log
 override.tf
 override.tf.json
+cleanup.sh

@@ -24,7 +24,7 @@ type Mutation {
   createMaidoTable(input: CreateMaidoTableInput!): MaidoTable
   updateMaidoTable(input: UpdateMaidoTableInput!): MaidoTable
   deleteMaidoTable(input: DeleteMaidoTableInput!): MaidoTable
-  createCognitoUser(input: createCognitoUserInput!): createCognitoUserOutput!
+  onboardUser(input: onboardUserInput!): onboardUserOutput!
     @aws_auth(cognito_groups: ["customers"])
 }
 
@@ -119,10 +119,11 @@ input UpdateMaidoTableInput {
   SK: String!
 }
 
-input createCognitoUserInput {
+input onboardUserInput {
   email: String!
 }
 
-type createCognitoUserOutput {
+type onboardUserOutput {
   cognitoUserID: ID!
+  stripeCustomerID: ID
 }
