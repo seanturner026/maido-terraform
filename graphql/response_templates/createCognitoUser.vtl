@@ -3,7 +3,7 @@
 #end
 #if($ctx.result.statusCode == 200)
   #set( $result = $util.parseJson($ctx.result.body) )
-  $util.toJson({"cognitoUserID":$result.User.Username, "stripeCustomerID": "0"})
+  $util.toJson({"cognitoUserID":$result.User.Username})
 #else
   $util.toJson({"cognitoUserID":"0"})
 #end

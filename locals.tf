@@ -6,7 +6,7 @@ locals {
 
     functions = {
       createCognitoUser = {
-        data_source = aws_cloudformation_stack.appsync_cognito_data_source.outputs.name
+        data_source = aws_cloudformation_stack.appsync_data_sources.outputs.cognitoName
         extra_data = {
           user_pool_id = aws_cognito_user_pool.this.id
         }
@@ -14,8 +14,12 @@ locals {
       putUserTable = {
         data_source = aws_appsync_datasource.dynamodb.name
       }
-      updateUserTableStripeDetails = {
-        data_source = aws_appsync_datasource.dynamodb.name
+      putQueueCreateStripeCustomer = {
+        data_source = aws_cloudformation_stack.appsync_data_sources.outputs.sqsName
+        extra_data = {
+          account_id = data.aws_caller_identity.current.account_id
+          queue_name = aws_sqs_queue.target.name
+        }
       }
     }
 
@@ -24,8 +28,8 @@ locals {
         {
           field         = "onboardUser"
           type          = "mutation"
-          data_source   = aws_cloudformation_stack.appsync_cognito_data_source.outputs.name
-          function_keys = ["createCognitoUser", "putUserTable", "updateUserTableStripeDetails"]
+          data_source   = aws_cloudformation_stack.appsync_data_sources.outputs.cognitoName
+          function_keys = ["createCognitoUser", "putUserTable", "putQueueCreateStripeCustomer"]
         }
       ]
       unit = [
@@ -43,12 +47,34 @@ locals {
     }
   }
 
-  resolvers_map = {
-    pipeline = {
-      for resolver in local.appsync.resolvers.pipeline : lower("${resolver.type}_${resolver.field}") => resolver
+  lambdas = {
+    stripe = {
+      description = "Wraps the Stripe API and writes to DynamoDB"
+      timeout     = 10
+      environment_variables = {
+        DYNAMODB_TABLE_ARN = aws_dynamodb_table.this.arn
+      }
+      iam_statements = {
+        dynamodb = {
+          actions   = ["dynamodb:DeleteItem", "dynamodb:PutItem", "dynamodb:Query"]
+          resources = [aws_dynamodb_table.this.arn]
+        }
+        sqs = {
+          actions   = ["sqs:DeleteMessage", "sqs:GetQueueAttributes", "sqs:ReceiveMessage"]
+          resources = [aws_sqs_queue.target.arn]
+        }
+      }
     }
-    unit = {
-      for resolver in local.appsync.resolvers.unit : lower("${resolver.type}_${resolver.field}") => resolver
+  }
+
+  maps = {
+    resolvers = {
+      pipeline = {
+        for resolver in local.appsync.resolvers.pipeline : lower("${resolver.type}_${resolver.field}") => resolver
+      }
+      unit = {
+        for resolver in local.appsync.resolvers.unit : lower("${resolver.type}_${resolver.field}") => resolver
+      }
     }
   }
 }

@@ -31,18 +31,18 @@ resource "aws_appsync_datasource" "dynamodb" {
   }
 }
 
-resource "aws_appsync_datasource" "lambda" {
-  name             = "${local.name}_lambda_datasource"
-  api_id           = aws_appsync_graphql_api.this.id
-  service_role_arn = aws_iam_role.appsync.arn
-  type             = "AWS_LAMBDA"
-}
+# resource "aws_appsync_datasource" "lambda" {
+#   name             = "${local.name}_lambda_datasource"
+#   api_id           = aws_appsync_graphql_api.this.id
+#   service_role_arn = aws_iam_role.appsync.arn
+#   type             = "AWS_LAMBDA"
+# }
 
 // Replace with terraform one day...
 //
 // https://github.com/hashicorp/terraform-provider-aws/issues/12721#issuecomment-787146303
-resource "aws_cloudformation_stack" "appsync_cognito_data_source" {
-  name          = "AppSyncCognitoDataSource"
+resource "aws_cloudformation_stack" "appsync_data_sources" {
+  name          = "AppSyncDataSources"
   template_body = <<-STACK
     Resources:
       AppsyncCognitoHttpDataSource:
@@ -50,6 +50,7 @@ resource "aws_cloudformation_stack" "appsync_cognito_data_source" {
           Properties:
             ApiId: ${aws_appsync_graphql_api.this.id}
             Name: "${local.name}_http_cognito"
+            Description: Cognito Identity Data Source
             Type: HTTP
             ServiceRoleArn: ${aws_iam_role.appsync.arn}
             HttpConfig:
@@ -59,15 +60,34 @@ resource "aws_cloudformation_stack" "appsync_cognito_data_source" {
                 AwsIamConfig:
                   SigningRegion: !Ref AWS::Region
                   SigningServiceName: cognito-idp
+
+      SQSHttpDataSource:
+        Type: AWS::AppSync::DataSource
+        Properties:
+          ApiId: ${aws_appsync_graphql_api.this.id}
+          Name: "${local.name}_http_sqs"
+          Description: SQS Data Source
+          Type: HTTP
+          ServiceRoleArn: ${aws_iam_role.appsync.arn}
+          HttpConfig:
+            Endpoint: !Sub https://sqs.$${AWS::Region}.amazonaws.com/
+            AuthorizationConfig:
+              AuthorizationType: AWS_IAM
+              AwsIamConfig:
+                SigningRegion: !Ref AWS::Region
+                SigningServiceName: sqs
     Outputs:
-      name:
+      cognitoName:
         Value: "${local.name}_http_cognito"
+      sqsName:
+        Value: "${local.name}_http_sqs"
   STACK
 
   lifecycle {
     ignore_changes = [template_body]
   }
 }
+
 
 # resource "aws_appsync_datasource" "http" {
 #   for_each = {
@@ -86,12 +106,13 @@ resource "aws_cloudformation_stack" "appsync_cognito_data_source" {
 
 
 resource "aws_appsync_resolver" "unit" {
-  for_each = local.resolvers_map.unit
+  for_each = local.maps.resolvers.unit
 
   api_id            = aws_appsync_graphql_api.this.id
   field             = each.value.field
   type              = title(each.value.type)
   data_source       = each.value.data_source
+  kind              = "UNIT"
   request_template  = templatefile("${path.root}/graphql/request_templates/${each.value.field}.vtl", lookup(each.value, "extra_data", {}))
   response_template = templatefile("${path.root}/graphql/response_templates/${each.value.field}.vtl", lookup(each.value, "extra_data", {}))
 
@@ -105,14 +126,14 @@ resource "aws_appsync_resolver" "unit" {
 }
 
 resource "aws_appsync_resolver" "pipeline" {
-  for_each = local.resolvers_map.pipeline
+  for_each = local.maps.resolvers.pipeline
 
   api_id            = aws_appsync_graphql_api.this.id
   field             = each.value.field
   type              = title(each.value.type)
+  kind              = "PIPELINE"
   request_template  = "{}"
   response_template = "$util.toJson($ctx.result)"
-  kind              = "PIPELINE"
 
   pipeline_config {
     functions = [for k in each.value.function_keys : aws_appsync_function.this[k].function_id]

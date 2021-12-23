@@ -121,9 +121,10 @@ input UpdateMaidoTableInput {
 
 input onboardUserInput {
   email: String!
+  firstName: String!
+  surName: String!
 }
 
 type onboardUserOutput {
   cognitoUserID: ID!
-  stripeCustomerID: ID
 }

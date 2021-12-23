@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+# data "aws_ecr_authorization_token" "token" {}
 data "aws_region" "current" {}
 
 data "aws_route53_zone" "this" {
@@ -33,10 +35,16 @@ data "aws_iam_policy_document" "appsync_datasource" {
     resources = [aws_dynamodb_table.this.arn, "${aws_dynamodb_table.this.arn}/index/${local.gsi_name}"]
   }
 
+  # statement {
+  #   effect    = "Allow"
+  #   actions   = ["lambda:InvokeFunction"]
+  #   resources = [aws_lambda_function.this["stripe"].arn]
+  # }
+
   statement {
     effect    = "Allow"
-    actions   = ["lambda:InvokeFunction"]
-    resources = [aws_dynamodb_table.this.arn, "${aws_dynamodb_table.this.arn}/index/${local.gsi_name}"]
+    actions   = ["sqs:SendMessage"]
+    resources = [aws_sqs_queue.target.arn, aws_sqs_queue.deadletter.arn]
   }
 }
 
@@ -125,6 +133,38 @@ data "aws_iam_policy_document" "bucket" {
         [aws_iam_role.appsync.arn],
         module.cloudfront.cloudfront_origin_access_identity_iam_arns
       )
+    }
+  }
+}
+
+data "aws_iam_policy_document" "lambda_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "lambda_policy" {
+  for_each = local.lambdas
+
+  statement {
+    sid       = "CreateCloudWatchLogGroup"
+    effect    = "Allow"
+    actions   = ["logs:PutLogEvents", "logs:CreateLogStream"]
+    resources = ["arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:log-group:/aws/lambda/${aws_lambda_function.this[each.key].function_name}*"]
+  }
+
+  dynamic "statement" {
+    for_each = each.value.iam_statements
+    iterator = s
+
+    content {
+      actions   = s.value.actions
+      resources = s.value.resources
     }
   }
 }

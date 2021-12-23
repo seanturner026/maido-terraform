@@ -6,7 +6,7 @@
     "SK": $util.dynamodb.toDynamoDBJson("USER#MAIDO"),
   },
   "attributeValues": {
-    "OnboardingStatus": $util.dynamodb.toDynamoDBJson("in_progress")
+    "OnboardingStatus": $util.dynamodb.toDynamoDBJson("awaiting_stripe_customer_id")
   },
   "condition": {
     "expression": "attribute_not_exists(#PK) AND attribute_not_exists(#SK)",
