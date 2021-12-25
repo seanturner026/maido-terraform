@@ -52,11 +52,17 @@ locals {
       description = "Wraps the Stripe API and writes to DynamoDB"
       timeout     = 10
       environment_variables = {
-        DYNAMODB_TABLE_ARN = aws_dynamodb_table.this.arn
+        DYNAMODB_TABLE_NAME = aws_dynamodb_table.this.name
+        STRIPE_API_KEY      = aws_ssm_parameter.stripe_api_key.value
+        USER_POOL_ID        = aws_cognito_user_pool.this.id
       }
       iam_statements = {
+        cognito = {
+          actions   = ["cognito-idp:AdminUpdateUserAttributes"]
+          resources = [aws_cognito_user_pool.this.arn]
+        }
         dynamodb = {
-          actions   = ["dynamodb:DeleteItem", "dynamodb:PutItem", "dynamodb:Query"]
+          actions   = ["dynamodb:BatchWriteItem", "dynamodb:Query"]
           resources = [aws_dynamodb_table.this.arn]
         }
         sqs = {

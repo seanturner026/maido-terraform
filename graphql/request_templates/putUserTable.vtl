@@ -6,7 +6,10 @@
     "SK": $util.dynamodb.toDynamoDBJson("USER#MAIDO"),
   },
   "attributeValues": {
-    "OnboardingStatus": $util.dynamodb.toDynamoDBJson("awaiting_stripe_customer_id")
+    "OnboardingStatus": $util.dynamodb.toDynamoDBJson("awaiting_stripe_customer_id"),
+    "EmailAddress": $util.dynamodb.toDynamoDBJson($ctx.args.input.email),
+    "FirstName": $util.dynamodb.toDynamoDBJson($ctx.args.input.firstName),
+    "SurName": $util.dynamodb.toDynamoDBJson($ctx.args.input.surName)
   },
   "condition": {
     "expression": "attribute_not_exists(#PK) AND attribute_not_exists(#SK)",

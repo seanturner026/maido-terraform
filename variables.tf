@@ -21,3 +21,9 @@ variable "fqdn_alias" {
   DESC
   default     = ""
 }
+
+variable "stripe_api_key" {
+  type        = string
+  description = "API Key for Stripe."
+  sensitive   = true
+}

@@ -5,7 +5,7 @@ resource "aws_lambda_function" "this" {
   role          = aws_iam_role.lambda[each.key].arn
   architectures = ["arm64"]
   description   = each.value.description
-  image_uri     = "${module.ecr.repository_url_map["maido/scratch"]}:scratch"
+  image_uri     = "${module.ecr.repository_url_map["${var.name}/scratch"]}:scratch"
   package_type  = "Image"
   timeout       = each.value.timeout
 

@@ -2,10 +2,7 @@ resource "aws_appsync_graphql_api" "this" {
   name                = "${local.name}_appsync"
   authentication_type = "AMAZON_COGNITO_USER_POOLS"
 
-  schema = join("\n", [
-    for schema in fileset("${path.root}/graphql/schemas", "*.graphql")
-    : file("${path.root}/graphql/schemas/${schema}")
-  ])
+  schema = file("${path.root}/graphql/schema.graphql")
 
   user_pool_config {
     aws_region     = data.aws_region.current.name

@@ -29,6 +29,19 @@ resource "aws_cognito_user_pool" "this" {
     require_uppercase                = true
     temporary_password_validity_days = 10
   }
+
+  schema {
+    attribute_data_type      = "String"
+    developer_only_attribute = false
+    mutable                  = true
+    name                     = "stripe_customer_id"
+    required                 = false
+
+    string_attribute_constraints {
+      min_length = 6
+      max_length = 255
+    }
+  }
 }
 
 resource "aws_cognito_user_pool_client" "this" {
