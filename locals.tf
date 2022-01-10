@@ -14,7 +14,17 @@ locals {
       putUserTable = {
         data_source = aws_appsync_datasource.dynamodb.name
       }
+      # putOrderTable = {
+      #   data_source = aws_appsync_datasource.dynamodb.name
+      # }
       putQueueCreateStripeCustomer = {
+        data_source = aws_cloudformation_stack.appsync_data_sources.outputs.sqsName
+        extra_data = {
+          account_id = data.aws_caller_identity.current.account_id
+          queue_name = aws_sqs_queue.target.name
+        }
+      }
+      putQueueCreateStripePaymentMethod = {
         data_source = aws_cloudformation_stack.appsync_data_sources.outputs.sqsName
         extra_data = {
           account_id = data.aws_caller_identity.current.account_id
@@ -28,9 +38,18 @@ locals {
         {
           field         = "onboardUser"
           type          = "mutation"
-          data_source   = aws_cloudformation_stack.appsync_data_sources.outputs.cognitoName
-          function_keys = ["createCognitoUser", "putUserTable", "putQueueCreateStripeCustomer"]
-        }
+          function_keys = ["createCognitoUser", "putQueueCreateStripeCustomer"]
+        },
+        {
+          field         = "onboardPaymentMethod"
+          type          = "mutation"
+          function_keys = ["putQueueCreateStripePaymentMethod"]
+        },
+        # {
+        #   field         = "createPayment"
+        #   type          = "mutation"
+        #   function_keys = ["putQueueCreateStripePayment"]
+        # }
       ]
       unit = [
         {
@@ -54,6 +73,7 @@ locals {
       environment_variables = {
         DYNAMODB_TABLE_NAME = aws_dynamodb_table.this.name
         STRIPE_API_KEY      = aws_ssm_parameter.stripe_api_key.value
+        SQS_QUEUE_URL       = aws_sqs_queue.target.url
         USER_POOL_ID        = aws_cognito_user_pool.this.id
       }
       iam_statements = {
@@ -66,7 +86,7 @@ locals {
           resources = [aws_dynamodb_table.this.arn]
         }
         sqs = {
-          actions   = ["sqs:DeleteMessage", "sqs:GetQueueAttributes", "sqs:ReceiveMessage"]
+          actions   = ["sqs:DeleteMessage", "sqs:DeleteMessageBatch", "sqs:GetQueueAttributes", "sqs:ReceiveMessage"]
           resources = [aws_sqs_queue.target.arn]
         }
       }

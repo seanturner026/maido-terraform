@@ -4,10 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 3.0"
     }
-    # docker = {
-    #   source  = "kreuzwerker/docker"
-    #   version = "~> 2.0"
-    # }
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "~> 2.0"
+    }
     time = {
       source  = "hashicorp/time"
       version = "~> 0.0"

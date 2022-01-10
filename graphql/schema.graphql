@@ -26,6 +26,8 @@ type Mutation {
   deleteMaidoTable(input: DeleteMaidoTableInput!): MaidoTable
   onboardUser(input: onboardUserInput!): onboardUserOutput!
     @aws_auth(cognito_groups: ["customers"])
+  onboardPaymentMethod: onboardPaymentMethodOutput!
+    @aws_auth(cognito_groups: ["customers"])
 }
 
 type Query {
@@ -127,4 +129,8 @@ input onboardUserInput {
 
 type onboardUserOutput {
   cognitoUserID: ID!
+}
+
+type onboardPaymentMethodOutput {
+  stripePaymentMethodID: String!
 }

@@ -4,7 +4,7 @@ module "cloudfront" {
   depends_on = [aws_acm_certificate_validation.this[0]]
 
   aliases                       = var.fqdn_alias != "" ? [var.fqdn_alias] : null
-  comment                       = "Maido Tea Company"
+  comment                       = "${title(var.name)} Tea Company"
   enabled                       = true
   is_ipv6_enabled               = true
   price_class                   = "PriceClass_All"
@@ -14,7 +14,7 @@ module "cloudfront" {
   create_origin_access_identity = true
 
   origin_access_identities = {
-    s3 = "Cloudfront access to Maido S3 bucket"
+    s3 = "Cloudfront access to ${title(var.name)} S3 bucket"
   }
 
   origin = {

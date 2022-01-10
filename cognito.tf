@@ -5,7 +5,7 @@ resource "aws_cognito_user_pool" "this" {
 
   admin_create_user_config {
     invite_message_template {
-      email_subject = "Maido New User Signup"
+      email_subject = "${title(var.name)} New User Signup"
       email_message = file("${path.root}/assets/cognito_invite_template.html")
       sms_message   = <<-MESSAGE
         username: {username}
@@ -66,7 +66,7 @@ resource "aws_cognito_user_pool_client" "this" {
 resource "aws_cognito_user_pool_client" "dev" {
   count = var.environment == "dev" ? 1 : 0
 
-  name                                 = "appsync-test-${local.name}"
+  name                                 = "${local.name}_appsync_testing"
   user_pool_id                         = aws_cognito_user_pool.this.id
   generate_secret                      = false
   allowed_oauth_flows                  = ["code", "implicit"]
@@ -74,12 +74,7 @@ resource "aws_cognito_user_pool_client" "dev" {
   allowed_oauth_scopes                 = ["email", "openid"]
   supported_identity_providers         = ["COGNITO"]
   callback_urls                        = [var.hosted_zone_name != "" && var.fqdn_alias != "" ? "https://${var.fqdn_alias}" : "https://${module.cloudfront.cloudfront_distribution_domain_name}"]
-
-  explicit_auth_flows = [
-    "ALLOW_REFRESH_TOKEN_AUTH",
-    "ALLOW_USER_PASSWORD_AUTH",
-    "ALLOW_USER_SRP_AUTH",
-  ]
+  explicit_auth_flows                  = ["ALLOW_REFRESH_TOKEN_AUTH", "ALLOW_USER_SRP_AUTH"]
 }
 
 resource "aws_cognito_identity_pool" "this" {
