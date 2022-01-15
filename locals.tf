@@ -6,7 +6,7 @@ locals {
 
     functions = {
       createCognitoUser = {
-        data_source = aws_cloudformation_stack.appsync_data_sources.outputs.cognitoName
+        data_source = aws_appsync_datasource.http["cognito_idp"].name
         extra_data = {
           user_pool_id = aws_cognito_user_pool.this.id
         }
@@ -18,14 +18,14 @@ locals {
       #   data_source = aws_appsync_datasource.dynamodb.name
       # }
       putQueueCreateStripeCustomer = {
-        data_source = aws_cloudformation_stack.appsync_data_sources.outputs.sqsName
+        data_source = aws_appsync_datasource.http["sqs"].name
         extra_data = {
           account_id = data.aws_caller_identity.current.account_id
           queue_name = aws_sqs_queue.target.name
         }
       }
       putQueueCreateStripePaymentMethod = {
-        data_source = aws_cloudformation_stack.appsync_data_sources.outputs.sqsName
+        data_source = aws_appsync_datasource.http["sqs"].name
         extra_data = {
           account_id = data.aws_caller_identity.current.account_id
           queue_name = aws_sqs_queue.target.name
@@ -82,7 +82,7 @@ locals {
           resources = [aws_cognito_user_pool.this.arn]
         }
         dynamodb = {
-          actions   = ["dynamodb:BatchWriteItem", "dynamodb:Query"]
+          actions   = ["dynamodb:BatchWriteItem"]
           resources = [aws_dynamodb_table.this.arn]
         }
         sqs = {
