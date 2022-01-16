@@ -1,6 +1,5 @@
 #set($data = $ctx.args.input)
 $util.qr($data.put("cognitoUserID", $ctx.prev.result.cognitoUserID))
-
 {
   "version": "2018-05-29",
   "method": "GET",

@@ -1,0 +1,10 @@
+#set($data = {})
+$util.qr($data.put("stripeCustomerID", $ctx.identity.claims["custom:stripe_customer_id"]))
+{
+  "version": "2017-02-28",
+  "operation": "Invoke",
+  "payload": {
+    "field": "putStripePaymentMethod",
+    "arguments":  $utils.toJson($data)
+  }
+}

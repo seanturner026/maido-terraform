@@ -17,25 +17,6 @@ resource "aws_appsync_graphql_api" "this" {
   # }
 }
 
-resource "aws_appsync_datasource" "dynamodb" {
-  name             = "${local.name}_dynamodb_datasource"
-  api_id           = aws_appsync_graphql_api.this.id
-  service_role_arn = aws_iam_role.appsync.arn
-  type             = "AMAZON_DYNAMODB"
-
-  dynamodb_config {
-    table_name = aws_dynamodb_table.this.name
-  }
-}
-
-# resource "aws_appsync_datasource" "lambda" {
-#   name             = "${local.name}_lambda_datasource"
-#   api_id           = aws_appsync_graphql_api.this.id
-#   service_role_arn = aws_iam_role.appsync.arn
-#   type             = "AWS_LAMBDA"
-# }
-
-
 resource "aws_appsync_datasource" "http" {
   for_each = {
     cognito_idp = "https://cognito-idp.${data.aws_region.current.name}.amazonaws.com/"
@@ -61,6 +42,29 @@ resource "aws_appsync_datasource" "http" {
   }
 }
 
+resource "aws_appsync_datasource" "dynamodb" {
+  name             = "${local.name}_dynamodb_datasource"
+  api_id           = aws_appsync_graphql_api.this.id
+  service_role_arn = aws_iam_role.appsync.arn
+  type             = "AMAZON_DYNAMODB"
+
+  dynamodb_config {
+    table_name = aws_dynamodb_table.this.name
+  }
+}
+
+resource "aws_appsync_datasource" "lambda" {
+  for_each = { for k, v in local.lambdas : k => v if v.trigger == "appsync" }
+
+  name             = "${local.name}_lambda_${each.key}"
+  api_id           = aws_appsync_graphql_api.this.id
+  service_role_arn = aws_iam_role.appsync.arn
+  type             = "AWS_LAMBDA"
+
+  lambda_config {
+    function_arn = aws_lambda_function.this[each.key].arn
+  }
+}
 
 resource "aws_appsync_resolver" "unit" {
   for_each = local.maps.resolvers.unit
