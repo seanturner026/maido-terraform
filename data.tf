@@ -128,11 +128,8 @@ data "aws_iam_policy_document" "bucket" {
     resources = ["${aws_s3_bucket.this.arn}/*"]
 
     principals {
-      type = "AWS"
-      identifiers = concat(
-        [aws_iam_role.appsync.arn],
-        module.cloudfront.cloudfront_origin_access_identity_iam_arns
-      )
+      type        = "AWS"
+      identifiers = module.cloudfront.cloudfront_origin_access_identity_iam_arns
     }
   }
 }

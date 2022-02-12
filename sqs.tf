@@ -15,7 +15,7 @@ resource "aws_sqs_queue" "deadletter" {
   name                      = "${local.name}_onboarding_deadletter_queue"
   delay_seconds             = 90
   max_message_size          = 2048
-  message_retention_seconds = 86400
+  message_retention_seconds = 1209600
   receive_wait_time_seconds = 20
   sqs_managed_sse_enabled   = true
 }

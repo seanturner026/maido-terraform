@@ -3,7 +3,6 @@ locals {
   name     = "${var.name}_${var.environment}"
 
   appsync = {
-
     functions = {
       putCognitoUser = {
         data_source = aws_appsync_datasource.http["cognito_idp"].name

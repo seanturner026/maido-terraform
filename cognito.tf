@@ -91,7 +91,7 @@ resource "aws_cognito_identity_pool_roles_attachment" "this" {
   identity_pool_id = aws_cognito_identity_pool.this.id
 
   roles = {
-    "unauthenticated" = aws_iam_role.cognito_unauth.arn
+    unauthenticated = aws_iam_role.cognito_unauth.arn
   }
 }
 
