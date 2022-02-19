@@ -4,6 +4,12 @@ locals {
 
   appsync = {
     functions = {
+      batchGetMaidoTablePrices = {
+        data_source = aws_appsync_datasource.dynamodb.name
+        extra_data = {
+          table_name = aws_dynamodb_table.this.name
+        }
+      }
       putCognitoUser = {
         data_source = aws_appsync_datasource.http["cognito_idp"].name
         extra_data = {
@@ -23,9 +29,9 @@ locals {
           queue_name = aws_sqs_queue.target.name
         }
       }
-      putStripePaymentMethod = {
-        data_source = aws_appsync_datasource.lambda["stripe_update_payment_method"].name
-      }
+      # putStripePaymentMethod = {
+      #   data_source = aws_appsync_datasource.lambda["stripe_update_payment_method"].name
+      # }
     }
 
     resolvers = {
@@ -38,7 +44,7 @@ locals {
         # {
         #   field         = "createPayment"
         #   type          = "mutation"
-        #   function_keys = ["putQueueCreateStripePayment"]
+        #   function_keys = ["batchGetMaidoTablePrices", "createStripePayment"]
         # }
       ]
       unit = [
@@ -48,10 +54,18 @@ locals {
           data_source = aws_appsync_datasource.dynamodb.name
         },
         {
-          field       = "putStripePaymentMethod"
-          type        = "mutation"
-          data_source = aws_appsync_datasource.lambda["stripe_update_payment_method"].name
+          field       = "batchGetMaidoTablePrices"
+          type        = "query"
+          data_source = aws_appsync_datasource.dynamodb.name
+          extra_data = {
+            table_name = aws_dynamodb_table.this.name
+          }
         },
+        # {
+        #   field       = "putStripePaymentMethod"
+        #   type        = "mutation"
+        #   data_source = aws_appsync_datasource.lambda["stripe_update_payment_method"].name
+        # },
         {
           field       = "queryMaidoTablesByGSI1"
           type        = "query"
@@ -87,15 +101,15 @@ locals {
         }
       }
     }
-    stripe_update_payment_method = {
-      description = "Creates a default payment method for a customer with the Stripe API"
-      timeout     = 10
-      environment_variables = {
-        STRIPE_API_KEY = aws_ssm_parameter.stripe_api_key.value
-      }
-      trigger        = "appsync"
-      iam_statements = {}
-    }
+    # stripe_update_payment_method = {
+    #   description = "Creates a default payment method for a customer with the Stripe API"
+    #   timeout     = 10
+    #   environment_variables = {
+    #     STRIPE_API_KEY = aws_ssm_parameter.stripe_api_key.value
+    #   }
+    #   trigger        = "appsync"
+    #   iam_statements = {}
+    # }
   }
 
   maps = {

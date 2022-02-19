@@ -26,11 +26,12 @@ type Mutation {
   deleteMaidoTable(input: DeleteMaidoTableInput!): MaidoTable
   onboardUser(input: onboardUserInput!): onboardUserOutput!
     @aws_auth(cognito_groups: ["customers"])
-  putStripePaymentMethod: onboardPaymentMethodOutput!
-    @aws_auth(cognito_groups: ["customers"])
+  # putStripePaymentMethod: onboardPaymentMethodOutput!
+  #   @aws_auth(cognito_groups: ["customers"])
 }
 
 type Query {
+  batchGetMaidoTablePrices(productKeys: [batchGetMaidoTablePricesInput]!): [productPrice] @aws_auth(cognito_groups: ["customers"])
   getMaidoTable(PK: String!, SK: String!): MaidoTable
     @aws_auth(cognito_groups: ["customers"])
   listMaidoTables(
@@ -127,10 +128,19 @@ input onboardUserInput {
   surName: String!
 }
 
+input batchGetMaidoTablePricesInput {
+  PK: String!
+  SK: String!
+}
+
 type onboardUserOutput {
   cognitoUserID: ID!
 }
 
-type putStripePaymentMethodOutput {
-  stripePaymentMethodID: String!
+# type putStripePaymentMethodOutput {
+#   stripePaymentMethodID: String!
+# }
+
+type productPrice {
+  Price: String!
 }

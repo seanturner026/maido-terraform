@@ -30,16 +30,19 @@ data "aws_iam_policy_document" "appsync_datasource" {
 
   // TODO: implement least permissive policy
   statement {
-    effect    = "Allow"
-    actions   = ["dynamodb:*"]
+    effect = "Allow"
+    actions = [
+      "dynamodb:BatchGetItem",
+      "dynamodb:*",
+    ]
     resources = [aws_dynamodb_table.this.arn, "${aws_dynamodb_table.this.arn}/index/${local.gsi_name}"]
   }
 
-  statement {
-    effect    = "Allow"
-    actions   = ["lambda:InvokeFunction"]
-    resources = [aws_lambda_function.this["stripe_update_payment_method"].arn]
-  }
+  # statement {
+  #   effect    = "Allow"
+  #   actions   = ["lambda:InvokeFunction"]
+  #   resources = [aws_lambda_function.this["stripe_update_payment_method"].arn]
+  # }
 
   statement {
     effect    = "Allow"

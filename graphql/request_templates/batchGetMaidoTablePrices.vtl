@@ -1,0 +1,17 @@
+#set($productKeys = [])
+#foreach($product in $${ctx.args.productKeys})
+  #set($map = {})
+  $util.qr($map.put("PK", $util.dynamodb.toString($product.PK)))
+  $util.qr($map.put("SK", $util.dynamodb.toString($product.SK)))
+  $util.qr($productKeys.add($map))
+#end
+{
+  "version" : "2018-05-29",
+  "operation" : "BatchGetItem",
+  "tables" : {
+    "${table_name}": {
+      "keys": $util.toJson($productKeys),
+      "consistentRead": true
+    }
+  }
+}
